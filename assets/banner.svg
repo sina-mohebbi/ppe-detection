@@ -1,0 +1,85 @@
+<svg viewBox="0 0 1280 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PPE Detection banner" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1120"/>
+      <stop offset="0.55" stop-color="#111a30"/>
+      <stop offset="1" stop-color="#1a1030"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.5" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#38bdf8" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- backdrop -->
+  <rect width="1280" height="340" rx="20" fill="url(#bg)"/>
+  <rect width="1280" height="340" rx="20" fill="url(#grid)"/>
+
+  <!-- ambient blobs -->
+  <circle cx="1080" cy="70" r="150" fill="#818cf8" opacity="0.12"/>
+  <circle cx="1180" cy="300" r="120" fill="#f472b6" opacity="0.10"/>
+  <circle cx="120" cy="300" r="130" fill="#38bdf8" opacity="0.10"/>
+
+  <!-- animated scan line -->
+  <rect x="60" y="0" width="900" height="340" fill="url(#scan)" opacity="0.6">
+    <animate attributeName="x" values="40;1000;40" dur="7s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- detection boxes -->
+  <g stroke-width="2.5" fill="none" filter="url(#glow)">
+    <g stroke="#38bdf8">
+      <rect x="70" y="70" width="150" height="200" rx="6">
+        <animate attributeName="stroke-opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+    <g stroke="#818cf8">
+      <rect x="240" y="120" width="130" height="150" rx="6">
+        <animate attributeName="stroke-opacity" values="1;0.4;1" dur="3.5s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+    <g stroke="#f472b6">
+      <rect x="945" y="95" width="160" height="185" rx="6">
+        <animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </g>
+  <!-- box labels -->
+  <g font-size="12" font-weight="700" fill="#0b1120">
+    <rect x="70" y="54" width="66" height="18" rx="3" fill="#38bdf8"/><text x="76" y="67">0.98</text>
+    <rect x="240" y="104" width="66" height="18" rx="3" fill="#818cf8"/><text x="246" y="117">0.91</text>
+    <rect x="945" y="79" width="66" height="18" rx="3" fill="#f472b6"/><text x="951" y="92">0.95</text>
+  </g>
+
+  <!-- corner brackets -->
+  <g stroke="url(#accent)" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M40 40 h34 M40 40 v34"/>
+    <path d="M1240 40 h-34 M1240 40 v34"/>
+    <path d="M40 300 h34 M40 300 v-34"/>
+    <path d="M1240 300 h-34 M1240 300 v-34"/>
+  </g>
+
+  <!-- title -->
+  <text x="640" y="180" text-anchor="middle" font-size="72" font-weight="800" fill="url(#accent)" filter="url(#glow)" letter-spacing="1">PPE&#160;DETECTION</text>
+  <text x="640" y="222" text-anchor="middle" font-size="21" font-weight="500" fill="#cbd5e1" letter-spacing="6">REAL-TIME&#160;&#183;&#160;COMPUTER&#160;VISION&#160;&#183;&#160;YOLO11</text>
+
+  <!-- tech chips -->
+  <g font-size="14" font-weight="600" text-anchor="middle">
+    <g><rect x="470" y="252" width="86" height="30" rx="15" fill="#ffffff" fill-opacity="0.06" stroke="#38bdf8" stroke-opacity="0.5"/><text x="513" y="272" fill="#7dd3fc">YOLO11</text></g>
+    <g><rect x="566" y="252" width="92" height="30" rx="15" fill="#ffffff" fill-opacity="0.06" stroke="#818cf8" stroke-opacity="0.5"/><text x="612" y="272" fill="#a5b4fc">PyTorch</text></g>
+    <g><rect x="668" y="252" width="80" height="30" rx="15" fill="#ffffff" fill-opacity="0.06" stroke="#a78bfa" stroke-opacity="0.5"/><text x="708" y="272" fill="#c4b5fd">ONNX</text></g>
+    <g><rect x="758" y="252" width="86" height="30" rx="15" fill="#ffffff" fill-opacity="0.06" stroke="#f472b6" stroke-opacity="0.5"/><text x="801" y="272" fill="#f9a8d4">OpenCV</text></g>
+  </g>
+</svg>

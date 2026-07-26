@@ -9,6 +9,8 @@ env/
 # ---- Data & models (too big for git) ----
 data/*
 !data/.gitkeep
+datasets/
+*.zip
 models/*
 !models/.gitkeep
 *.pt
@@ -24,6 +26,7 @@ assets/*
 !assets/*.gif
 !assets/*.png
 !assets/*.jpg
+!assets/*.svg
 
 # ---- Notebooks ----
 .ipynb_checkpoints/
@@ -36,3 +39,4 @@ runs/
 Thumbs.db
 .vscode/
 .idea/
+.claude/
