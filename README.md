@@ -39,11 +39,32 @@ curl.exe -L -o data/PPE.zip https://huggingface.co/datasets/51ddhesh/PPE_Detecti
 python src/prepare_data.py
 ```
 
+## Training
+
+I fine-tune **YOLO11s** with transfer learning. The `s` (small) variant is a
+deliberate choice: it fits comfortably in 8 GB of VRAM with room to spare and
+stays light enough to deploy on CPU later, while still being accurate enough for
+the task.
+
+`src/train.py` is tuned for a memory-constrained GPU (my RTX 4060 Laptop, 8 GB):
+
+- **Mixed precision (AMP)** — roughly halves VRAM use and speeds training up
+- **Batch 16 at 640px** — fills the card without running out of memory
+- **Disk caching** instead of RAM caching — keeps the dataset cache off system RAM
+- **Early stopping** — halts a plateaued run so no GPU time is wasted
+
+```bash
+python src/train.py --epochs 50
+```
+
+The script first confirms it's actually training on the GPU (an easy thing to get
+wrong), then trains and copies the best weights to `models/best.pt`.
+
 ## Roadmap
 
 - [x] Project scaffold
 - [x] Dataset preparation
-- [ ] Training pipeline (YOLO11, GPU)
+- [x] Training pipeline (YOLO11, GPU)
 - [ ] Evaluation & failure analysis
 - [ ] Optimization (ONNX export + benchmark)
 - [ ] Demo (Streamlit)
