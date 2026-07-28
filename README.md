@@ -60,12 +60,53 @@ python src/train.py --epochs 50
 The script first confirms it's actually training on the GPU (an easy thing to get
 wrong), then trains and copies the best weights to `models/best.pt`.
 
+## Results
+
+Trained for 50 epochs and evaluated on the held-out **test** set (1,234 images
+the model never saw during training):
+
+| Metric | Value |
+|--------|-------|
+| mAP@0.5 | **0.812** |
+| mAP@0.5:0.95 | 0.520 |
+| Precision | 0.847 |
+| Recall | 0.745 |
+
+Per class:
+
+| Class | mAP@0.5 |
+|-------|---------|
+| goggles | 0.947 |
+| Vest | 0.940 |
+| helmet | 0.891 |
+| safety_shoe | 0.726 |
+| mask | 0.718 |
+| Gloves | 0.652 |
+
+### What the numbers say
+
+The spread is informative rather than uniform. **Vest, goggles and helmet** score
+highest — they're large or visually distinctive and well represented in the data.
+**Gloves and masks trail** because they're small, high-variance objects with fewer
+training instances (masks in particular have only ~86 test instances, so that
+figure is noisier). Precision (0.85) sits above recall (0.75), so the model is a
+little conservative — when it fires it's usually right, but it misses some of the
+harder small objects. For a safety use case you can trade some precision back for
+recall by lowering the confidence threshold.
+
+`src/evaluate.py` produces these metrics along with the confusion matrix and
+PR/F1 curves.
+
+<p align="center">
+  <img src="reports/confusion_matrix_normalized.png" alt="Normalized confusion matrix" width="70%">
+</p>
+
 ## Roadmap
 
 - [x] Project scaffold
 - [x] Dataset preparation
 - [x] Training pipeline (YOLO11, GPU)
-- [ ] Evaluation & failure analysis
+- [x] Evaluation & failure analysis
 - [ ] Optimization (ONNX export + benchmark)
 - [ ] Demo (Streamlit)
 - [ ] Deployment
