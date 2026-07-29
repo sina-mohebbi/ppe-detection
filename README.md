@@ -101,13 +101,39 @@ PR/F1 curves.
   <img src="reports/confusion_matrix_normalized.png" alt="Normalized confusion matrix" width="70%">
 </p>
 
+## Optimization for the edge
+
+The point of this step is to answer "can it run somewhere real, and how fast?"
+`src/export_onnx.py` exports the trained model to ONNX, produces an INT8-quantized
+variant, and benchmarks all three so the trade-offs are measured, not assumed.
+
+| Format | Device | Size (MB) | Latency (ms) | FPS |
+|--------|--------|-----------|--------------|-----|
+| PyTorch `.pt` | GPU | 18.3 | 7.6 | 131 |
+| ONNX FP32 | CPU | 36.2 | 60.9 | 16 |
+| ONNX INT8 (dynamic) | CPU | 9.4 | 740 | 1.4 |
+
+Two findings:
+
+- **It's edge-deployable.** Exported to ONNX, it runs at **~16 FPS on CPU alone** —
+  no GPU required. For safety monitoring that's comfortably real-time.
+- **Dynamic INT8 quantization backfired — and I measured it rather than assuming.**
+  It shrank the model 4× but made CPU inference ~12× *slower*. Dynamic quantization
+  suits weight-bound transformer/RNN operators; YOLO is convolution-bound, so
+  ONNXRuntime ends up wrapping each conv in quantize/dequantize steps that cost more
+  than they save. The right approach for a CNN is static (calibration-based)
+  quantization — noted as future work. For now, FP32 ONNX is the CPU deployment
+  target.
+
+Full write-up: [`reports/benchmark.md`](reports/benchmark.md).
+
 ## Roadmap
 
 - [x] Project scaffold
 - [x] Dataset preparation
 - [x] Training pipeline (YOLO11, GPU)
 - [x] Evaluation & failure analysis
-- [ ] Optimization (ONNX export + benchmark)
+- [x] Optimization (ONNX export + benchmark)
 - [ ] Demo (Streamlit)
 - [ ] Deployment
 
