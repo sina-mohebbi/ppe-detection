@@ -127,6 +127,30 @@ Two findings:
 
 Full write-up: [`reports/benchmark.md`](reports/benchmark.md).
 
+## Demo
+
+A Streamlit app (`demo/app.py`) lets you upload an image or a short video and see
+the model annotate it live. It runs on the CPU ONNX model, so it works anywhere —
+no GPU needed.
+
+![demo](assets/demo.gif)
+
+*Live detection on an unseen construction-site clip — footage from
+[Pexels](https://www.pexels.com/), never used in training.*
+
+`src/infer_video.py` runs the same detection from the command line, with
+CPU-friendly options (frame-skipping, input downscaling) for smooth inference on
+modest hardware:
+
+```bash
+streamlit run demo/app.py                            # interactive demo
+python src/infer_video.py --source clip.mp4 --frame-skip 2
+```
+
+Predictions on held-out test images:
+
+![predictions](assets/predictions_grid.jpg)
+
 ## Roadmap
 
 - [x] Project scaffold
@@ -134,7 +158,7 @@ Full write-up: [`reports/benchmark.md`](reports/benchmark.md).
 - [x] Training pipeline (YOLO11, GPU)
 - [x] Evaluation & failure analysis
 - [x] Optimization (ONNX export + benchmark)
-- [ ] Demo (Streamlit)
+- [x] Demo (Streamlit)
 - [ ] Deployment
 
 ## Planned stack
