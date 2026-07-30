@@ -136,7 +136,7 @@ no GPU needed.
 ![demo](assets/demo.gif)
 
 *Live detection on an unseen construction-site clip — footage from
-[Pexels](https://www.pexels.com/), never used in training.*
+[Mixkit](https://mixkit.co/) (free licence), never used in training.*
 
 `src/infer_video.py` runs the same detection from the command line, with
 CPU-friendly options (frame-skipping, input downscaling) for smooth inference on
