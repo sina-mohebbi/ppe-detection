@@ -151,6 +151,26 @@ Predictions on held-out test images:
 
 ![predictions](assets/predictions_grid.jpg)
 
+## From detection to compliance
+
+Detection alone says "there's a helmet here." A safety system needs to answer the
+real question: **"is this person compliant?"** `src/detect_violations.py` adds that
+layer — it pairs a person detector (pretrained COCO model) with the PPE model and
+checks whether each detected person has a helmet in their head region, flagging
+anyone who doesn't. No retraining required.
+
+![compliance](assets/compliance_demo.jpg)
+
+*Each person flagged COMPLIANT (green) or NO HELMET (red), on held-out test images.*
+
+It's a deliberately simple spatial heuristic, so it inherits the detector's limits
+(a missed helmet reads as a false violation) — but it turns a bounding-box model
+into something closer to a usable compliance monitor.
+
+```bash
+python src/detect_violations.py --source photo.jpg
+```
+
 ## Roadmap
 
 - [x] Project scaffold
@@ -159,6 +179,7 @@ Predictions on held-out test images:
 - [x] Evaluation & failure analysis
 - [x] Optimization (ONNX export + benchmark)
 - [x] Demo (Streamlit)
+- [x] Compliance / violation detection
 - [ ] Deployment
 
 ## Planned stack
