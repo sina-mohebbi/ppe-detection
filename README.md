@@ -171,6 +171,27 @@ into something closer to a usable compliance monitor.
 python src/detect_violations.py --source photo.jpg
 ```
 
+## Temporal monitoring with tracking
+
+Per-frame compliance answers "who is non-compliant *right now*"; a real monitoring
+system needs to follow each worker over time. `src/track_compliance.py` adds
+**ByteTrack** multi-object tracking on top — every worker gets a persistent ID,
+and the system accumulates a per-worker compliance history, so it reports
+*sustained* violations rather than per-frame noise.
+
+![tracking](assets/tracking_demo.gif)
+
+*Each worker tracked with a stable ID; a live HUD counts workers and current
+violations, with per-worker COMPLIANT / NO HELMET labels.*
+
+```bash
+python src/track_compliance.py --source clip.mp4
+```
+
+Like the compliance layer, it inherits the detector's limits (a missed helmet can
+read as a violation), but it turns single-frame detection into worker-level
+monitoring over time.
+
 ## Roadmap
 
 - [x] Project scaffold
@@ -180,6 +201,7 @@ python src/detect_violations.py --source photo.jpg
 - [x] Optimization (ONNX export + benchmark)
 - [x] Demo (Streamlit)
 - [x] Compliance / violation detection
+- [x] Temporal monitoring (tracking)
 - [ ] Deployment
 
 ## Planned stack
