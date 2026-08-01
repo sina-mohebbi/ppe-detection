@@ -185,6 +185,11 @@ and the system accumulates a per-worker compliance history, so it reports
 violations, with per-worker COMPLIANT / NO HELMET labels. (Footage:
 [Pexels](https://www.pexels.com/), unseen during training.)*
 
+![tracking group](assets/tracking_group.gif)
+
+*The same pipeline scaling to a busy site — up to 10 workers tracked and
+evaluated at once, correctly marking the helmeted workers compliant.*
+
 ```bash
 python src/track_compliance.py --source clip.mp4
 ```
