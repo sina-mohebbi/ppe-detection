@@ -182,7 +182,8 @@ and the system accumulates a per-worker compliance history, so it reports
 ![tracking](assets/tracking_demo.gif)
 
 *Each worker tracked with a stable ID; a live HUD counts workers and current
-violations, with per-worker COMPLIANT / NO HELMET labels.*
+violations, with per-worker COMPLIANT / NO HELMET labels. (Footage:
+[Pexels](https://www.pexels.com/), unseen during training.)*
 
 ```bash
 python src/track_compliance.py --source clip.mp4
