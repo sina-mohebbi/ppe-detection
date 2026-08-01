@@ -10,6 +10,13 @@ CPU for edge-style deployment.
 
 > 🚧 **Work in progress** — building this in the open, step by step.
 
+<p align="center">
+  <img src="assets/tracking_group.gif" alt="Real-time PPE compliance monitoring" width="90%">
+</p>
+
+<p align="center"><em>Real-time compliance monitoring — every worker on a live site
+detected, tracked with a stable ID, and evaluated for helmet compliance at once.</em></p>
+
 ## Why this project
 
 Safety-compliance monitoring is a real, deployed use of computer vision on
