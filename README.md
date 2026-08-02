@@ -108,6 +108,37 @@ PR/F1 curves.
   <img src="reports/confusion_matrix_normalized.png" alt="Normalized confusion matrix" width="70%">
 </p>
 
+## Improving generalization
+
+The results above are measured on the same dataset the model trained on. To see
+how it holds up on **unseen** data, I evaluated it on a *second* public dataset
+(Ultralytics Construction-PPE) — and found a big gap:
+
+| Baseline model tested on | mAP@0.5 |
+|--------------------------|---------|
+| Its own test set | 0.812 |
+| An unseen dataset | **0.118** |
+
+That 0.81 → 0.12 collapse showed the model had overfit to a single distribution.
+The fix: **merge the second dataset in**, harmonizing its class taxonomy onto ours
+(`src/merge_datasets.py` — it remaps the source classes and drops the ones we don't
+use). After retraining:
+
+| Test set | Baseline | Merged |
+|----------|----------|--------|
+| Original | 0.812 | 0.803 |
+| Unseen (cross-dataset) | 0.118 | **0.741** |
+
+**Cross-dataset accuracy jumped ~6×** (0.12 → 0.74) for less than a point of
+regression on the original test set — far broader real-world robustness at almost
+no cost. This merged model is the one used for the demos and deployment.
+
+Honest caveats (full write-up: [`reports/dataset_merge.md`](reports/dataset_merge.md)):
+the merge improves *generalization*, not the weak classes on the original
+distribution; and the "boots → safety_shoe" mapping is imperfect — I tested
+dropping it, which recovered safety_shoe slightly but hurt overall accuracy and
+generalization more, so it's kept.
+
 ## Optimization for the edge
 
 The point of this step is to answer "can it run somewhere real, and how fast?"
@@ -211,6 +242,7 @@ monitoring over time.
 - [x] Dataset preparation
 - [x] Training pipeline (YOLO11, GPU)
 - [x] Evaluation & failure analysis
+- [x] Cross-domain generalization (dataset merge)
 - [x] Optimization (ONNX export + benchmark)
 - [x] Demo (Streamlit)
 - [x] Compliance / violation detection
