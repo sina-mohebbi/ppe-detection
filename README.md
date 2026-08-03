@@ -4,6 +4,8 @@
 
 # PPE Detection 🦺
 
+![CI](https://github.com/sina-mohebbi/ppe-detection/actions/workflows/ci.yml/badge.svg)
+
 Detecting **personal protective equipment** — helmet, safety vest, mask, gloves,
 goggles, safety shoes — in images and video with **YOLO11**, built to run on a
 CPU for edge-style deployment.
