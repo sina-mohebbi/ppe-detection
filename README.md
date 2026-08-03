@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/banner.svg" alt="PPE Detection — Real-time Computer Vision with YOLO11" width="100%">
-</p>
-
 # PPE Detection 🦺👷
 
 ![CI](https://github.com/sina-mohebbi/ppe-detection/actions/workflows/ci.yml/badge.svg)
