@@ -2,246 +2,311 @@
   <img src="assets/banner.svg" alt="PPE Detection — Real-time Computer Vision with YOLO11" width="100%">
 </p>
 
-# PPE Detection 🦺👷
+PPE Detection 🦺👷
 
-![CI](https://github.com/sina-mohebbi/ppe-detection/actions/workflows/ci.yml/badge.svg)
+A computer vision system for detecting personal protective equipment such as
+helmets, safety vests, masks, gloves, goggles, and safety shoes in images and
+videos.
 
-Detecting **personal protective equipment** — helmet, safety vest, mask, gloves,
-goggles, safety shoes — in images and video with **YOLO11**, built to run on a
-CPU for edge-style deployment.
-
+The model uses YOLO11 and can run on a CPU, making it suitable for edge devices
+and systems without a dedicated GPU.
 
 <p align="center">
   <img src="assets/tracking_group.gif" alt="Real-time PPE compliance monitoring" width="90%">
 </p>
+<p align="center"><em>Real-time helmet compliance monitoring: workers are detected,
+tracked with stable IDs, and checked for helmet use.</em></p>
 
-<p align="center"><em>Real-time compliance monitoring — every worker on a live site
-detected, tracked with a stable ID, and evaluated for helmet compliance at once.</em></p>
+Why this project
 
-## Why this project
+PPE monitoring is a practical use of computer vision in construction sites,
+factories, and warehouses.
 
-Safety-compliance monitoring is a real, deployed use of computer vision on
-construction sites, in factories, and in warehouses. The plan is to take it
-end-to-end rather than stop at a notebook: **data → training → evaluation →
-optimization → demo → deployment.**
+The goal of this project is to build the complete system, not just a model-training
+notebook:
 
-## Dataset
+data → training → evaluation → optimization → demo → deployment
 
-The base dataset is a public PPE collection in YOLO format
-([51ddhesh/PPE_Detection](https://huggingface.co/datasets/51ddhesh/PPE_Detection),
-CC-BY-4.0), covering six classes: `Gloves, Vest, goggles, helmet, mask, safety_shoe`.
+Dataset
 
-| Split | Images |
-|-------|--------|
-| Train | 8,774 |
-| Val   | 2,070 |
-| Test  | 1,234 |
+The base dataset is a public PPE dataset in YOLO format:
 
-`src/prepare_data.py` gets it ready for training: it extracts the archive,
-rewrites the dataset's `data.yaml` to absolute paths (so training works no matter
-which directory it's launched from — a common cause of "0 images found" errors),
-and prints a quick sanity summary of image counts and class names.
+51ddhesh/PPE_Detection
+under the CC-BY-4.0 licence.
 
-```bash
+It contains six classes:
+
+Gloves, Vest, goggles, helmet, mask, and safety_shoe.
+
+Split	Images
+Train	8,774
+Val	2,070
+Test	1,234
+
+src/prepare_data.py prepares the dataset for training. It:
+
+* extracts the downloaded archive
+* changes the paths in data.yaml to absolute paths
+* checks the number of images in each split
+* prints the class names
+
+Using absolute paths allows training to work correctly regardless of the directory
+from which the command is launched. This also prevents common "0 images found"
+errors.
+
 curl.exe -L -o data/PPE.zip https://huggingface.co/datasets/51ddhesh/PPE_Detection/resolve/main/PPE.zip
 python src/prepare_data.py
-```
 
-## Training
+Training
 
-I fine-tune **YOLO11s** with transfer learning. The `s` (small) variant is a
-deliberate choice: it fits comfortably in 8 GB of VRAM with room to spare and
-stays light enough to deploy on CPU later, while still being accurate enough for
-the task.
+I fine-tuned YOLO11s using transfer learning.
 
-`src/train.py` is tuned for a memory-constrained GPU (my RTX 4060 Laptop, 8 GB):
+I chose the s small model because it runs within 8 GB of VRAM while remaining
+light enough for CPU deployment. It also provides enough accuracy for this task.
 
-- **Mixed precision (AMP)** — roughly halves VRAM use and speeds training up
-- **Batch 16 at 640px** — fills the card without running out of memory
-- **Disk caching** instead of RAM caching — keeps the dataset cache off system RAM
-- **Early stopping** — halts a plateaued run so no GPU time is wasted
+src/train.py is configured for my RTX 4060 Laptop GPU with 8 GB of VRAM:
 
-```bash
+* Mixed precision (AMP) — reduces VRAM use and speeds up training
+* Batch size 16 at 640px — uses the available GPU memory without running out
+* Disk caching — stores the dataset cache on disk instead of system RAM
+* Early stopping — stops training when the model is no longer improving
+
 python src/train.py --epochs 50
-```
 
-The script first confirms it's actually training on the GPU (an easy thing to get
-wrong), then trains and copies the best weights to `models/best.pt`.
+Before training starts, the script checks that PyTorch is using the GPU. After
+training, it copies the best model weights to:
 
-## Results
+models/best.pt
 
-Trained for 50 epochs and evaluated on the held-out **test** set (1,234 images
-the model never saw during training):
+Results
 
-| Metric | Value |
-|--------|-------|
-| mAP@0.5 | **0.812** |
-| mAP@0.5:0.95 | 0.520 |
-| Precision | 0.847 |
-| Recall | 0.745 |
+The model was trained for 50 epochs and evaluated on the held-out test set.
 
-Per class:
+The test set contains 1,234 images that were not used during training.
 
-| Class | mAP@0.5 |
-|-------|---------|
-| goggles | 0.947 |
-| Vest | 0.940 |
-| helmet | 0.891 |
-| safety_shoe | 0.726 |
-| mask | 0.718 |
-| Gloves | 0.652 |
+Metric	Value
+mAP@0.5	0.812
+mAP@0.5:0.95	0.520
+Precision	0.847
+Recall	0.745
 
-### What the numbers say
+Results by class
 
-The spread is informative rather than uniform. **Vest, goggles and helmet** score
-highest — they're large or visually distinctive and well represented in the data.
-**Gloves and masks trail** because they're small, high-variance objects with fewer
-training instances (masks in particular have only ~86 test instances, so that
-figure is noisier). Precision (0.85) sits above recall (0.75), so the model is a
-little conservative — when it fires it's usually right, but it misses some of the
-harder small objects. For a safety use case you can trade some precision back for
-recall by lowering the confidence threshold.
+Class	mAP@0.5
+goggles	0.947
+Vest	0.940
+helmet	0.891
+safety_shoe	0.726
+mask	0.718
+Gloves	0.652
 
-`src/evaluate.py` produces these metrics along with the confusion matrix and
-PR/F1 curves.
+What the results show
+
+Performance varies between classes.
+
+Vests, goggles, and helmets have the highest scores. These objects are usually
+larger, more visually distinctive, and well represented in the dataset.
+
+Gloves and masks are more difficult to detect because they are smaller and can
+look very different depending on the image. They also have fewer training
+examples. Masks, for example, have only around 86 instances in the test set, so
+their result is less stable.
+
+Precision is about 0.85, while recall is about 0.75. This means that when the
+model detects an object, it is usually correct, but it still misses some difficult
+or small objects.
+
+For a safety-monitoring system, recall can be increased by lowering the confidence
+threshold, although this may also produce more false detections.
+
+src/evaluate.py generates these metrics together with:
+
+* the confusion matrix
+* precision-recall curves
+* F1-score curves
 
 <p align="center">
   <img src="reports/confusion_matrix_normalized.png" alt="Normalized confusion matrix" width="70%">
 </p>
 
-## Improving generalization
+Improving generalization
 
-The results above are measured on the same dataset the model trained on. To see
-how it holds up on **unseen** data, I evaluated it on a *second* public dataset
-(Ultralytics Construction-PPE) — and found a big gap:
+The first results were measured on the same dataset used for training.
 
-| Baseline model tested on | mAP@0.5 |
-|--------------------------|---------|
-| Its own test set | 0.812 |
-| An unseen dataset | **0.118** |
+To check how well the model performs on completely new data, I also tested it on
+a second public dataset: Ultralytics Construction-PPE.
 
-That 0.81 → 0.12 collapse showed the model had overfit to a single distribution.
-The fix: **merge the second dataset in**, harmonizing its class taxonomy onto ours
-(`src/merge_datasets.py` — it remaps the source classes and drops the ones we don't
-use). After retraining:
+The first model performed well on its own test set but poorly on the new dataset:
 
-| Test set | Baseline | Merged |
-|----------|----------|--------|
-| Original | 0.812 | 0.803 |
-| Unseen (cross-dataset) | 0.118 | **0.741** |
+Baseline model tested on	mAP@0.5
+Its own test set	0.812
+An unseen dataset	0.118
 
-**Cross-dataset accuracy jumped ~6×** (0.12 → 0.74) for less than a point of
-regression on the original test set — far broader real-world robustness at almost
-no cost. This merged model is the one used for the demos and deployment.
+The drop from 0.812 to 0.118 showed that the model had learned the original
+dataset too closely and did not generalize well to different images.
 
-Honest caveats (full write-up: [`reports/dataset_merge.md`](reports/dataset_merge.md)):
-the merge improves *generalization*, not the weak classes on the original
-distribution; and the "boots → safety_shoe" mapping is imperfect — I tested
-dropping it, which recovered safety_shoe slightly but hurt overall accuracy and
-generalization more, so it's kept.
+To improve this, I merged the second dataset with the original one.
 
-## Optimization for the edge
+src/merge_datasets.py:
 
-The point of this step is to answer "can it run somewhere real, and how fast?"
-`src/export_onnx.py` exports the trained model to ONNX, produces an INT8-quantized
-variant, and benchmarks all three so the trade-offs are measured, not assumed.
+* matches the class names from the second dataset to the original classes
+* removes classes that are not used in this project
+* creates a combined dataset for retraining
+
+After retraining on the merged dataset:
+
+Test set	Baseline	Merged
+Original	0.812	0.803
+Unseen cross-dataset set	0.118	0.741
+
+Cross-dataset mAP increased from 0.118 to 0.741, while performance on the
+original test set decreased only slightly from 0.812 to 0.803.
+
+This shows that the merged model performs much better on new data with almost no
+loss on the original dataset.
+
+The merged model is used for the demos and deployment.
+
+Limitations
+
+A full explanation is available in
+reports/dataset_merge.md.
+
+The dataset merge mainly improves generalization. It does not fully solve the lower
+performance of gloves, masks, and safety shoes on the original dataset.
+
+The mapping from boots in the second dataset to safety_shoe is also not
+perfect. I tested removing this mapping. It slightly improved the original
+safety_shoe result, but reduced overall performance and cross-dataset
+generalization, so I kept it.
+
+CPU and edge optimization
+
+The goal of this step was to answer two questions:
+
+1. Can the model run without a GPU?
+2. How fast can it run?
+
+src/export_onnx.py exports the trained model to ONNX, creates a dynamically
+quantized INT8 version, and benchmarks all three model formats.
 
 | Format | Device | Size (MB) | Latency (ms) | FPS |
-|--------|--------|-----------|--------------|-----|
-| PyTorch `.pt` | GPU | 18.3 | 7.6 | 131 |
+|––––|––––|———–|—–|
+| PyTorch .pt | GPU | 18.3 | 7.6 | 131 |
 | ONNX FP32 | CPU | 36.2 | 60.9 | 16 |
-| ONNX INT8 (dynamic) | CPU | 9.4 | 740 | 1.4 |
+| ONNX INT8 dynamic | CPU | 9.4 | 740 | 1.4 |
 
-Two findings:
+Main findings
 
-- **It's edge-deployable.** Exported to ONNX, it runs at **~16 FPS on CPU alone** —
-  no GPU required. For safety monitoring that's comfortably real-time.
-- **Dynamic INT8 quantization backfired — and I measured it rather than assuming.**
-  It shrank the model 4× but made CPU inference ~12× *slower*. Dynamic quantization
-  suits weight-bound transformer/RNN operators; YOLO is convolution-bound, so
-  ONNXRuntime ends up wrapping each conv in quantize/dequantize steps that cost more
-  than they save. The right approach for a CNN is static (calibration-based)
-  quantization — noted as future work. For now, FP32 ONNX is the CPU deployment
-  target.
+* The model can run in real time on a CPU.
+    The ONNX FP32 model runs at around 16 FPS without a GPU. This is fast enough
+    for many safety-monitoring applications.
+* Dynamic INT8 quantization reduced performance.
+    It made the model around four times smaller, but CPU inference became about
+    twelve times slower.
 
-Full write-up: [`reports/benchmark.md`](reports/benchmark.md).
+Dynamic quantization often works better for transformer and RNN models. YOLO
+mainly uses convolution operations. In this case, ONNX Runtime adds extra
+quantization and dequantization steps around the convolution layers, and those
+steps take more time than they save.
 
-## Demo
+A better option for this type of CNN would be static quantization using a
+calibration dataset. This is left as future work.
 
-A Streamlit app (`demo/app.py`) lets you upload an image or a short video and see
-the model annotate it live. It runs on the CPU ONNX model, so it works anywhere —
-no GPU needed.
+For now, the ONNX FP32 model is the main CPU deployment format.
 
-![demo](assets/demo.gif)
+A full benchmark report is available in:
 
-*Live detection on an unseen construction-site clip — footage from
-[Mixkit](https://mixkit.co/) (free licence), never used in training.*
+reports/benchmark.md
 
-`src/infer_video.py` runs the same detection from the command line, with
-CPU-friendly options (frame-skipping, input downscaling) for smooth inference on
-modest hardware:
+Demo
 
-```bash
-streamlit run demo/app.py                            # interactive demo
+The Streamlit application in demo/app.py allows users to upload an image or a
+short video and view the detections.
+
+The application uses the ONNX model on the CPU, so no GPU is required.
+
+Detection on a construction-site video that was not used during training. Video
+footage from Mixkit under its free licence.
+
+src/infer_video.py provides the same video detection from the command line.
+
+It includes CPU-friendly options such as frame skipping and input resizing, which
+can improve performance on lower-end hardware.
+
+streamlit run demo/app.py
 python src/infer_video.py --source clip.mp4 --frame-skip 2
-```
 
-Predictions on held-out test images:
+Predictions on test images
 
-![predictions](assets/predictions_grid.jpg)
+From detection to compliance
 
-## From detection to compliance
+Basic object detection can show that a helmet exists somewhere in an image.
 
-Detection alone says "there's a helmet here." A safety system needs to answer the
-real question: **"is this person compliant?"** `src/detect_violations.py` adds that
-layer — it pairs a person detector (pretrained COCO model) with the PPE model and
-checks whether each detected person has a helmet in their head region, flagging
-anyone who doesn't. No retraining required.
+A safety-monitoring system needs to answer a more useful question:
 
-![compliance](assets/compliance_demo.jpg)
+Is each detected person wearing a helmet?
 
-*Each person flagged COMPLIANT (green) or NO HELMET (red), on held-out test images.*
+src/detect_violations.py adds this functionality.
 
-It's a deliberately simple spatial heuristic, so it inherits the detector's limits
-(a missed helmet reads as a false violation) — but it turns a bounding-box model
-into something closer to a usable compliance monitor.
+It combines:
 
-```bash
+* a pretrained COCO person detector
+* the trained PPE detector
+* a simple position-based helmet check
+
+For each detected person, the script checks whether a helmet appears inside the
+person’s head region. People without a detected helmet are marked as violations.
+
+No additional model training is required.
+
+Each person is marked as COMPLIANT in green or NO HELMET in red on held-out test
+images.
+
+This method uses a simple position-based rule and therefore has the same
+limitations as the object detector. For example, a helmet missed by the detector
+may incorrectly be reported as a violation.
+
+However, it allows the system to check helmet compliance for each detected person
+instead of only showing PPE bounding boxes.
+
 python src/detect_violations.py --source photo.jpg
-```
 
-## Temporal monitoring with tracking
+Tracking workers over time
 
-Per-frame compliance answers "who is non-compliant *right now*"; a real monitoring
-system needs to follow each worker over time. `src/track_compliance.py` adds
-**ByteTrack** multi-object tracking on top — every worker gets a persistent ID,
-and the system accumulates a per-worker compliance history, so it reports
-*sustained* violations rather than per-frame noise.
+Checking each video frame separately only shows who appears non-compliant at that
+moment.
 
-![tracking](assets/tracking_demo.gif)
+A monitoring system should also follow each worker over time.
 
-*Each worker tracked with a stable ID; a live HUD counts workers and current
-violations, with per-worker COMPLIANT / NO HELMET labels. (Footage:
-[Pexels](https://www.pexels.com/), unseen during training.)*
+src/track_compliance.py adds ByteTrack multi-object tracking. Each worker is
+given a stable ID, and the system stores a helmet-compliance history for that
+worker.
 
-![tracking group](assets/tracking_group.gif)
+This reduces unstable frame-by-frame results and helps identify violations that
+continue over several frames.
 
-*The same pipeline scaling to a busy site — up to 10 workers tracked and
-evaluated at once, correctly marking the helmeted workers compliant.*
+Each worker is tracked with a stable ID. The live display shows the number of
+workers, the current number of violations, and a COMPLIANT or NO HELMET label for
+each worker. Video footage from Pexels and not used
+during training.
 
-```bash
+The same system working on a busier site, with up to 10 workers tracked and
+checked at the same time.
+
 python src/track_compliance.py --source clip.mp4
-```
 
-Like the compliance layer, it inherits the detector's limits (a missed helmet can
-read as a violation), but it turns single-frame detection into worker-level
-monitoring over time.
+The tracking system still depends on the quality of the PPE detector. A missed
+helmet may still be reported as a violation.
 
-## Stack
+However, tracking allows the system to monitor each worker’s helmet compliance
+over time instead of making independent decisions for every frame.
 
-**Ultralytics YOLO11** · **PyTorch** · **ONNX / onnxruntime** · **OpenCV** ·
-**Streamlit**
+Stack
 
-## Author
+Ultralytics YOLO11 · PyTorch · ONNX / ONNX Runtime · OpenCV ·
+Streamlit
+
+Author
 
 Sina Mohebbi
