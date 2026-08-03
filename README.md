@@ -10,7 +10,6 @@ Detecting **personal protective equipment** — helmet, safety vest, mask, glove
 goggles, safety shoes — in images and video with **YOLO11**, built to run on a
 CPU for edge-style deployment.
 
-> 🚧 **Work in progress** — building this in the open, step by step.
 
 <p align="center">
   <img src="assets/tracking_group.gif" alt="Real-time PPE compliance monitoring" width="90%">
