@@ -1,6 +1,11 @@
+# CPU-only PyTorch, so the app deploys on a CPU host (Streamlit Community Cloud).
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.6.0+cpu
+torchvision==0.21.0+cpu
+
 # Core CV / model
 ultralytics>=8.3.0
-opencv-python>=4.10.0
+opencv-python-headless>=4.10.0
 
 # Optimization / edge inference
 onnx>=1.16.0
@@ -16,6 +21,6 @@ pyyaml>=6.0
 pillow>=10.0.0
 tqdm>=4.66.0
 
-# NOTE: install the CUDA build of torch/torchvision separately so training
-# uses your GPU (not the CPU-only default):
+# NOTE: torch is pinned to the CPU build above so the Streamlit app deploys on a
+# CPU host. For GPU training, reinstall the CUDA build instead:
 #   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
