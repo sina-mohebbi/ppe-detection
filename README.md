@@ -166,17 +166,18 @@ variant, and benchmarks all three so the trade-offs are measured, not assumed.
 | ONNX FP32 | CPU | 36.2 | 60.9 | 16 |
 | ONNX INT8 (dynamic) | CPU | 9.4 | 740 | 1.4 |
 
-Two findings:
+### Two main findings
 
-- **It's edge-deployable.** Exported to ONNX, it runs at **~16 FPS on CPU alone** —
-  no GPU required. For safety monitoring that's comfortably real-time.
-- **Dynamic INT8 quantization backfired — and I measured it rather than assuming.**
-  It shrank the model 4× but made CPU inference ~12× *slower*. Dynamic quantization
-  suits weight-bound transformer/RNN operators; YOLO is convolution-bound, so
-  ONNXRuntime ends up wrapping each conv in quantize/dequantize steps that cost more
-  than they save. The right approach for a CNN is static (calibration-based)
-  quantization — noted as future work. For now, FP32 ONNX is the CPU deployment
-  target.
+- **The model is suitable for edge deployment.**
+  After exporting the model to **ONNX FP32**, it runs at around **16 FPS on CPU**, with no dedicated GPU required. This is sufficient for near-real-time PPE monitoring in many edge and industrial applications.
+
+- **Dynamic INT8 quantization reduced model size but increased latency.**
+  The quantized model was approximately **4× smaller**, but CPU inference became around **12× slower**. Dynamic quantization is generally more effective for models dominated by matrix multiplication, such as transformers and RNNs. YOLO, however, is mainly convolution-based.
+
+- In this case, ONNX Runtime introduced additional quantize and dequantize operations around the convolution layers. The overhead of these operations was greater than the performance benefit of INT8 computation.
+
+-  A more suitable optimization method would be **static INT8 quantization with calibration data**, which can quantize both weights and activations more efficiently. This is left as future work. For the current deployment, **ONNX FP32** provides the best balance between speed, compatibility, and accuracy on CPU.
+
 
 Full write-up: [`reports/benchmark.md`](reports/benchmark.md).
 
