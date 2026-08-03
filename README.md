@@ -26,6 +26,11 @@ model-training notebook:
 
 **data → training → evaluation → optimization → demo → deployment**
 
+## Stack
+
+**Ultralytics YOLO11** · **PyTorch** · **ONNX / onnxruntime** · **OpenCV** ·
+**Streamlit**
+
 ## Dataset
 
 The base dataset is a public PPE dataset in YOLO format:
@@ -248,10 +253,6 @@ Like the compliance layer, it inherits the detector's limits (a missed helmet ca
 read as a violation), but it turns single-frame detection into worker-level
 monitoring over time.
 
-## Stack
-
-**Ultralytics YOLO11** · **PyTorch** · **ONNX / onnxruntime** · **OpenCV** ·
-**Streamlit**
 
 ## All experiments — model comparison
 
