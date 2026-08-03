@@ -256,6 +256,44 @@ monitoring over time.
 **Ultralytics YOLO11** · **PyTorch** · **ONNX / onnxruntime** · **OpenCV** ·
 **Streamlit**
 
+## All experiments — model comparison
+
+Every model I trained, evaluated on the same held-out test sets with one variable
+changed at a time. **our-test** is the original 51ddhesh distribution; **cross-dataset**
+is a second, unseen dataset (Construction-PPE) that measures real generalization.
+
+| Model | What changed | our-test mAP@0.5 | Cross-dataset mAP@0.5 |
+|-------|--------------|:----------------:|:---------------------:|
+| Baseline | 51ddhesh only | 0.812 | 0.118 |
+| **Merged** ✅ *(deployed)* | + Construction-PPE dataset | 0.803 | **0.741** |
+| Augmented | merged + copy-paste / mixup | 0.794 | 0.772 |
+| High-res | merged, trained at 960px | 0.802 | 0.742 |
+| + Gloves data | merged + 4,663 extra glove images | 0.796 | 0.738 |
+| Boots-free | merged, boots→safety_shoe mapping dropped | 0.795 | 0.611 |
+
+Per-class mAP@0.5 on the original test set (best per row in bold):
+
+| Class | Baseline | Merged | Augmented | High-res | +Gloves | Boots-free |
+|-------|:--------:|:------:|:---------:|:--------:|:-------:|:----------:|
+| goggles | 0.947 | 0.936 | 0.929 | **0.957** | 0.940 | 0.938 |
+| Vest | 0.940 | **0.942** | 0.928 | 0.940 | 0.933 | 0.934 |
+| helmet | 0.891 | 0.890 | 0.894 | **0.900** | 0.896 | 0.874 |
+| safety_shoe | **0.726** | 0.676 | 0.612 | 0.631 | 0.676 | 0.698 |
+| mask | 0.718 | 0.720 | **0.768** | 0.754 | 0.701 | 0.705 |
+| Gloves | 0.652 | **0.657** | 0.632 | 0.632 | 0.633 | 0.623 |
+
+**Takeaways:**
+
+- The **baseline** looks best on its own test set but collapses on unseen data
+  (0.118) — classic overfitting to a single distribution.
+- **Merged** is the deployed model: it holds original-test accuracy while lifting
+  cross-dataset accuracy ~6×, the best overall trade-off.
+- Every attempt to push the weak classes (augmentation, higher resolution, more
+  glove data, dropping the boots mapping) either helped one class at another's
+  expense or failed to transfer — evidence that the weak classes are limited by
+  **data quality, not model capacity**. Full write-up in
+  [`reports/REPORT.md`](reports/REPORT.md).
+
 ## Author
 
 Sina Mohebbi
