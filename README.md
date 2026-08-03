@@ -166,7 +166,7 @@ variant, and benchmarks all three so the trade-offs are measured, not assumed.
 | ONNX FP32 | CPU | 36.2 | 60.9 | 16 |
 | ONNX INT8 (dynamic) | CPU | 9.4 | 740 | 1.4 |
 
-### Two main findings
+### Main findings
 
 - **The model is suitable for edge deployment.**
   After exporting the model to **ONNX FP32**, it runs at around **16 FPS on CPU**, with no dedicated GPU required. This is sufficient for near-real-time PPE monitoring in many edge and industrial applications.
