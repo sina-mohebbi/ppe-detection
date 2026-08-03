@@ -238,20 +238,7 @@ Like the compliance layer, it inherits the detector's limits (a missed helmet ca
 read as a violation), but it turns single-frame detection into worker-level
 monitoring over time.
 
-## Roadmap
-
-- [x] Project scaffold
-- [x] Dataset preparation
-- [x] Training pipeline (YOLO11, GPU)
-- [x] Evaluation & failure analysis
-- [x] Cross-domain generalization (dataset merge)
-- [x] Optimization (ONNX export + benchmark)
-- [x] Demo (Streamlit)
-- [x] Compliance / violation detection
-- [x] Temporal monitoring (tracking)
-- [ ] Deployment
-
-## Planned stack
+## Stack
 
 **Ultralytics YOLO11** · **PyTorch** · **ONNX / onnxruntime** · **OpenCV** ·
 **Streamlit**
